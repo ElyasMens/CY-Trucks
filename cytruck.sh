@@ -107,6 +107,7 @@ fi
 #Tri -d1
 if [ $trid1 -eq 1 ]
 then	
+	the_begin=$(date +%s)
 	check_temp_and_images 
 	echo > tmp.csv | mv tmp.csv temp
 	# 1er et 2e awk: Recuperation des colones 1 et 6 et Elimination des doublons 
@@ -127,12 +128,42 @@ then
 				 	print driver";"nbRoutes[driver]   
 				 }
 			}' | sort -t';' -k2 -n -r | head -10 > temp/tmp.csv 
-	cat temp/tmp.csv
+	#gnuplot
+	echo > tmp_gnuplot.gp | mv tmp_gnuplot.gp temp
+	echo "set terminal png size 800,900" > tmp_gnuplot.gp
+	echo "set output 'tmpImg_d1.png'" >> tmp_gnuplot.gp
+
+	echo "set style data histogram" >> tmp_gnuplot.gp
+	echo "set style fill solid" >> tmp_gnuplot.gp
+	echo "set boxwidth 0.5" >> tmp_gnuplot.gp
+	echo "set style fill solid border -1" >> tmp_gnuplot.gp
+
+	echo "unset key" >> tmp_gnuplot.gp
+
+	echo "set xlabel 'DRIVER NAMES' rotate by 180 offset 0,-9" >> tmp_gnuplot.gp
+	echo "set y2label 'NB ROUTES' offset 3,0" >> tmp_gnuplot.gp
+	echo "set ylabel 'Nom=f(Nbr trajets)' offset 4,0 " >> tmp_gnuplot.gp
+	echo "set xtic rotate by 90 font '0,10' offset 0.5,-9.5" >> tmp_gnuplot.gp
+	echo "set ytic rotate by 90 font '0,10' offset 79,1" >> tmp_gnuplot.gp
+
+	echo "set yrange [0:*]" >> tmp_gnuplot.gp
+	echo "set datafile separator ';'" >> tmp_gnuplot.gp
+	echo "plot 'temp/tmp.csv' using 2:xticlabels(1) with boxes" >> tmp_gnuplot.gp
+	gnuplot -persist -c "tmp_gnuplot.gp"
+	#----------------------------------
+	convert 'tmpImg_d1.png' -rotate 90 'Img_d1.png'
+	mv tmpImg_d1.png temp 
+	mv Img_d1.png images
+	
+	the_end=$(date +%s)
+	the_time=$((the_end - the_begin))
+	echo "Durée du traitement: $the_time s."
 fi
 
 #Tri -d2
 if [ $trid2 -eq 1 ]
 then
+	the_begin=$(date +%s)
 	check_temp_and_images 
 	echo > tmp.csv | mv tmp.csv temp
 	#awk: Somme des distance en fonction de chaque conducteur puis tri par ordre décroissant
@@ -143,12 +174,42 @@ then
 				print driver";"distance[driver]
 			}
 		}' | sort -t';' -k2 -n -r | head -10 > temp/tmp.csv 	
-	cat temp/tmp.csv
+	#gnuplot
+	echo > tmp_gnuplot.gp | mv tmp_gnuplot.gp temp
+	echo "set terminal png size 800,900" > tmp_gnuplot.gp
+	echo "set output 'tmpImg_d2.png'" >> tmp_gnuplot.gp
+
+	echo "set style data histogram" >> tmp_gnuplot.gp
+	echo "set style fill solid" >> tmp_gnuplot.gp
+	echo "set boxwidth 0.5" >> tmp_gnuplot.gp
+	echo "set style fill solid border -1" >> tmp_gnuplot.gp
+
+	echo "unset key" >> tmp_gnuplot.gp
+
+	echo "set xlabel 'DRIVER NAMES' rotate by 180 offset 0,-9" >> tmp_gnuplot.gp
+	echo "set y2label 'DISTANCE (Km)' offset 3,0" >> tmp_gnuplot.gp
+	echo "set ylabel 'Distance=f(Driver)' offset 4,0 " >> tmp_gnuplot.gp
+	echo "set xtic rotate by 90 font '0,10.3' offset 0.5,-9.5" >> tmp_gnuplot.gp
+	echo "set ytic rotate by 90 offset 79,1" >> tmp_gnuplot.gp
+
+	echo "set yrange [0:*]" >> tmp_gnuplot.gp
+	echo "set datafile separator ';'" >> tmp_gnuplot.gp
+	echo "plot 'temp/tmp.csv' using 2:xticlabels(1) with boxes" >> tmp_gnuplot.gp
+	gnuplot -persist -c "tmp_gnuplot.gp"
+	#----------------------------------
+	convert 'tmpImg_d2.png' -rotate 90 'Img_d2.png'
+	mv tmpImg_d2.png temp 
+	mv Img_d2.png images
+	
+	the_end=$(date +%s)
+	the_time=$((the_end - the_begin))
+	echo "Durée du traitement: $the_time s."
 fi
 
 #Tri -l
 if [ $triL -eq 1 ]
 then 
+	the_begin=$(date +%s)
 	check_temp_and_images 
 	echo > tmp.csv | mv tmp.csv temp
 	#awk: Somme des distance en fonction de chaque route puis tri par ordre décroissant 
@@ -160,12 +221,12 @@ then
 		}
 	}' | sort -t';' -k2 -n -r | head -10 | sort -t';' -k1 -n -r > temp/tmp.csv  
 	#Avec chatgpt
-	# Crée le script Gnuplot 
+	echo > tmp_gnuplot.gp | mv tmp_gnuplot.gp temp
 	echo "set terminal png size 900,800" > tmp_gnuplot.gp
 	echo "set output 'Img_l.png'" >> tmp_gnuplot.gp
 
 	echo "set style data histogram" >> tmp_gnuplot.gp
-	echo "set style fill solid" >> tmp_gnuplot.gp
+	echo "set style fill solid border -1" >> tmp_gnuplot.gp
 	echo "set boxwidth 0.5" >> tmp_gnuplot.gp
 
 	echo "set xlabel 'Route ID'" >> tmp_gnuplot.gp
@@ -173,13 +234,17 @@ then
 	echo "set title 'Nombre de routes'" >> tmp_gnuplot.gp
 	echo "unset key" >> tmp_gnuplot.gp
 
+	echo "set yrange [0:*]" >> tmp_gnuplot.gp
 	echo "set datafile separator ';'" >> tmp_gnuplot.gp
 	echo "plot 'temp/tmp.csv' using 2:xtic(1) with boxes" >> tmp_gnuplot.gp
-
-
 	# Exécute Gnuplot avec le script généré
 	gnuplot -persist -c "tmp_gnuplot.gp"
+	#----------------------------------
 	mv Img_l.png images
+	
+	the_end=$(date +%s)
+	the_time=$((the_end - the_begin))
+	echo "Durée du traitement: $the_time s."
 fi
 
 #Tri -t
