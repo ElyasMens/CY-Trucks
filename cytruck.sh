@@ -91,6 +91,7 @@ nbLines=`cat $data | wc -l`
 nbLines=$((nbLines -1)) 
 
 #-h: Afficher les commandes du programmes
+#prend tu temps sur le pc de l'ecole
 if [ $help -eq 1 ]
 then
 	echo "Pour executer le programme: bash script [nom_fichier] [option]"
@@ -108,52 +109,23 @@ fi
 if [ $trid1 -eq 1 ]
 then	
 	the_begin=$(date +%s)
+	echo "begin"
 	check_temp_and_images 
-	echo > tmp.csv | mv tmp.csv temp
-	# 1er et 2e awk: Recuperation des colones 1 et 6 et Elimination des doublons 
-	# 3e awk: Calcul du nombre de route par conducteur puis tri par ordre décroissant
-	tail -$nbLines $data | awk '{
-		split($0, tab,";"); 
-		print tab[1]";"tab[6]
-	}' | awk '{
-			tab[$0]++
-		} END {
-		for (line in tab) {
-			print line
-		}
-	}' | awk -F';' '{	
-				nbRoutes[$2]++;	
-				} END { 
-				for (driver in nbRoutes) {
-				 	print driver";"nbRoutes[driver]   
-				 }
-			}' | sort -t';' -k2 -n -r | head -10 > temp/tmp.csv 
-	#gnuplot
-	echo > tmp_gnuplot.gp | mv tmp_gnuplot.gp temp
-	echo "set terminal png size 800,900" > tmp_gnuplot.gp
-	echo "set output 'tmpImg_d1.png'" >> tmp_gnuplot.gp
-
-	echo "set style data histogram" >> tmp_gnuplot.gp
-	echo "set style fill solid" >> tmp_gnuplot.gp
-	echo "set boxwidth 0.5" >> tmp_gnuplot.gp
-	echo "set style fill solid border -1" >> tmp_gnuplot.gp
-
-	echo "unset key" >> tmp_gnuplot.gp
-
-	echo "set xlabel 'DRIVER NAMES' rotate by 180 offset 0,-9" >> tmp_gnuplot.gp
-	echo "set y2label 'NB ROUTES' offset 3,0" >> tmp_gnuplot.gp
-	echo "set ylabel 'Nom=f(Nbr trajets)' offset 4,0 " >> tmp_gnuplot.gp
-	echo "set xtic rotate by 90 font '0,10' offset 0.5,-9.5" >> tmp_gnuplot.gp
-	echo "set ytic rotate by 90 font '0,10' offset 79,1" >> tmp_gnuplot.gp
-
-	echo "set yrange [0:*]" >> tmp_gnuplot.gp
-	echo "set datafile separator ';'" >> tmp_gnuplot.gp
-	echo "plot 'temp/tmp.csv' using 2:xticlabels(1) with boxes" >> tmp_gnuplot.gp
-	gnuplot -persist -c "tmp_gnuplot.gp"
-	#----------------------------------
-	convert 'tmpImg_d1.png' -rotate 90 'Img_d1.png'
-	mv tmpImg_d1.png temp 
-	mv Img_d1.png images
+	echo > tmp.csv 
+	mv tmp.csv temp
+	# le if du awk ignore les doublons 
+	# sort pour le tri par ordre décroissant
+	tail -n $nbLines $data | awk -F';' '{
+    if (!driver_route[$1";"$6]++) {
+        nbRoutes[$6]++;
+    	}
+	}END {
+    for (driver in nbRoutes) {
+        print driver ";" nbRoutes[driver];
+    	}	
+	}' | sort -t';' -k2 -n -r | head -10 > temp/tmp.csv
+	cat temp/tmp.csv
+	
 	
 	the_end=$(date +%s)
 	the_time=$((the_end - the_begin))
@@ -175,31 +147,12 @@ then
 			}
 		}' | sort -t';' -k2 -n -r | head -10 > temp/tmp.csv 	
 	#gnuplot
-	echo > tmp_gnuplot.gp | mv tmp_gnuplot.gp temp
-	echo "set terminal png size 800,900" > tmp_gnuplot.gp
-	echo "set output 'tmpImg_d2.png'" >> tmp_gnuplot.gp
-
-	echo "set style data histogram" >> tmp_gnuplot.gp
-	echo "set style fill solid" >> tmp_gnuplot.gp
-	echo "set boxwidth 0.5" >> tmp_gnuplot.gp
-	echo "set style fill solid border -1" >> tmp_gnuplot.gp
-
-	echo "unset key" >> tmp_gnuplot.gp
-
-	echo "set xlabel 'DRIVER NAMES' rotate by 180 offset 0,-9" >> tmp_gnuplot.gp
-	echo "set y2label 'DISTANCE (Km)' offset 3,0" >> tmp_gnuplot.gp
-	echo "set ylabel 'Distance=f(Driver)' offset 4,0 " >> tmp_gnuplot.gp
-	echo "set xtic rotate by 90 font '0,10.3' offset 0.5,-9.5" >> tmp_gnuplot.gp
-	echo "set ytic rotate by 90 offset 79,1" >> tmp_gnuplot.gp
-
-	echo "set yrange [0:*]" >> tmp_gnuplot.gp
-	echo "set datafile separator ';'" >> tmp_gnuplot.gp
-	echo "plot 'temp/tmp.csv' using 2:xticlabels(1) with boxes" >> tmp_gnuplot.gp
-	gnuplot -persist -c "tmp_gnuplot.gp"
+	cat temp/tmp.csv
+	gnuplot -persist -c "gnuplot/d2_gnuplot.gp"
 	#----------------------------------
 	convert 'tmpImg_d2.png' -rotate 90 'Img_d2.png'
-	mv tmpImg_d2.png temp 
 	mv Img_d2.png images
+	mv tmpImg_d2.png temp 
 	
 	the_end=$(date +%s)
 	the_time=$((the_end - the_begin))
