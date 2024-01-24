@@ -111,8 +111,8 @@ then
 	the_begin=$(date +%s)
 	echo "begin"
 	check_temp_and_images 
-	echo > tmp.csv 
-	mv tmp.csv temp
+	echo > tmp.txt
+	mv tmp.txt temp
 	# le if du awk ignore les doublons 
 	# sort pour le tri par ordre décroissant
 	tail -n $nbLines $data | awk -F';' '{
@@ -123,9 +123,12 @@ then
     for (driver in nbRoutes) {
         print driver ";" nbRoutes[driver];
     	}	
-	}' | sort -t';' -k2 -n -r | head -10 > temp/tmp.csv
-	cat temp/tmp.csv
-	
+	}' | sort -t';' -k2 -n -r | head -10 > temp/tmp.txt
+	#gnuplot -d1
+	gnuplot -persist -c "gnuplot/d1_gnuplot.gp"
+	convert 'tmpImg_d1.png' -rotate 90 'img_d1.png'
+	mv img_d1.png images
+	mv tmpImg_d1.png temp 
 	
 	the_end=$(date +%s)
 	the_time=$((the_end - the_begin))
@@ -137,7 +140,7 @@ if [ $trid2 -eq 1 ]
 then
 	the_begin=$(date +%s)
 	check_temp_and_images 
-	echo > tmp.csv | mv tmp.csv temp
+	echo > tmp.txt | mv tmp.txt temp
 	#awk: Somme des distance en fonction de chaque conducteur puis tri par ordre décroissant
 	tail -$nbLines $data| awk -F';' '{
 		distance[$6]=distance[$6]+$5;
@@ -145,13 +148,11 @@ then
 			for ( driver in distance ) {
 				print driver";"distance[driver]
 			}
-		}' | sort -t';' -k2 -n -r | head -10 > temp/tmp.csv 	
-	#gnuplot
-	cat temp/tmp.csv
+		}' | sort -t';' -k2 -n -r | head -10 > temp/tmp.txt 	
+	#gnuplot -d2
 	gnuplot -persist -c "gnuplot/d2_gnuplot.gp"
-	#----------------------------------
-	convert 'tmpImg_d2.png' -rotate 90 'Img_d2.png'
-	mv Img_d2.png images
+	convert 'tmpImg_d2.png' -rotate 90 'img_d2.png'
+	mv img_d2.png images
 	mv tmpImg_d2.png temp 
 	
 	the_end=$(date +%s)
@@ -164,7 +165,7 @@ if [ $triL -eq 1 ]
 then 
 	the_begin=$(date +%s)
 	check_temp_and_images 
-	echo > tmp.csv | mv tmp.csv temp
+	echo > tmp.txt | mv tmp.txt temp
 	#awk: Somme des distance en fonction de chaque route puis tri par ordre décroissant 
 	tail -$nbLines $data | awk -F';' '{ 
 		distance[$1]=distance[$1]+$5;
@@ -172,28 +173,11 @@ then
 		for ( routeId in distance ) {
 			print routeId";"distance[routeId]
 		}
-	}' | sort -t';' -k2 -n -r | head -10 | sort -t';' -k1 -n -r > temp/tmp.csv  
-	#Avec chatgpt
-	echo > tmp_gnuplot.gp | mv tmp_gnuplot.gp temp
-	echo "set terminal png size 900,800" > tmp_gnuplot.gp
-	echo "set output 'Img_l.png'" >> tmp_gnuplot.gp
-
-	echo "set style data histogram" >> tmp_gnuplot.gp
-	echo "set style fill solid border -1" >> tmp_gnuplot.gp
-	echo "set boxwidth 0.5" >> tmp_gnuplot.gp
-
-	echo "set xlabel 'Route ID'" >> tmp_gnuplot.gp
-	echo "set ylabel 'Distance (en km)'" >>tmp_gnuplot.gp
-	echo "set title 'Nombre de routes'" >> tmp_gnuplot.gp
-	echo "unset key" >> tmp_gnuplot.gp
-
-	echo "set yrange [0:*]" >> tmp_gnuplot.gp
-	echo "set datafile separator ';'" >> tmp_gnuplot.gp
-	echo "plot 'temp/tmp.csv' using 2:xtic(1) with boxes" >> tmp_gnuplot.gp
-	# Exécute Gnuplot avec le script généré
-	gnuplot -persist -c "tmp_gnuplot.gp"
+	}' | sort -t';' -k2 -n -r | head -10 | sort -t';' -k1 -n -r > temp/tmp.txt  
+	#gnuplot -dl
+	gnuplot -persist -c "gnuplot/l_gnuplot.gp"
 	#----------------------------------
-	mv Img_l.png images
+	mv img_l.png images
 	
 	the_end=$(date +%s)
 	the_time=$((the_end - the_begin))
@@ -204,7 +188,7 @@ fi
 if [ $triT -eq 1 ]
 then
 	check_temp_and_images
-	echo > tmp.csv | mv tmp.csv temp 
+	echo > tmp.txt | mv tmp.txt temp 
 	
 fi
 
