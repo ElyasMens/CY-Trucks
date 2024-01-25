@@ -1,13 +1,13 @@
 #!/bin/bash
 
-#Verifie si la commande d'execution du programme est correctement écrite
+#Checks the program execution command
 if [ $# -lt 1 ] || [ $# -lt 2 ] 
 then
 	echo "Pour de l'aide faites la commande suivante: bash script [nom_fichier] -h"
 	exit 1	
 fi
 
-#Verifie si le fichier en entrée existe 
+#check if the entry file exists 
 if [ ! -f $1 ]
 then 
 	echo "le fichier n'existe pas"
@@ -15,13 +15,13 @@ then
 	exit 2
 fi
 
-#Verifie l'existence du dossier demo
+#check if the dir demo exists
 if [ ! -d demo ]
 then
 	mkdir demo
 fi
 
-#Verifie l'existence du dossier data_dir
+#check if the dir data_dir exists
 if [ ! -d data_dir ]
 then
 	mkdir data_dir
@@ -30,14 +30,14 @@ then
 	rm -f data_dir/*
 fi
 
-#Verifie que le dossier images est vide
+#check if the dir images is empty
 function check_images {
 if [ -f images/* ]
 then
 	mv images/* demo
 fi
 }
-#Verifie l'existence du dossier img
+#check if the dir images exists
 if [ ! -d images ]
 then
 	mkdir images
@@ -45,15 +45,15 @@ else
 	check_images
 fi
 
-#Verifie si le dossier temp existe et s'il contient des fichier temporaire / appelle la fonction check_images
+#check if the dir temp exists 
 function check_temp_and_images {
 	if [ ! -d temp ]
 	then
-		#echo "tmpdir crée"
+		#echo "tmpdir created"
 		mkdir temp
 	elif [ "-f temp/*" ]
 	then	
-		#echo "supprime les tmp"
+		#echo "remove all tmp"
 		rm -f temp/*
 	fi
 	check_images
@@ -69,7 +69,7 @@ for i in `seq 2 $#`
 do
 case ${!i} in
 '-h')help=1
-i=$((i+1))break;; # ignore les autres commandes si -h est en paramètre
+i=$((i+1))break;; 
 '-d1')trid1=1
 i=$((i+1));;
 '-d2')trid2=1
@@ -187,8 +187,27 @@ fi
 #Tri -t
 if [ $triT -eq 1 ]
 then
+	the_begin=$(date +%s)
 	check_temp_and_images
-	echo > tmp.txt | mv tmp.txt temp 
+	echo > tmp.txt | mv tmp.txt temp
+	tail -$nbLines data.csv | awk -F';' '{ 
+	if($2==1){
+    	trajets[$3]++ 
+    	}
+	} END {
+    	print "Nombre de trajets passant en premier par la ville :"
+    	for (ville in trajets) {
+       	 print ville ";" trajets[ville]
+    	}
+	}' >> temp/tmp.txt 
+	grep "ANDILLY;417" temp/tmp.txt
+
+	#head -10 temp/tmp.txt
+	
+
+	the_end=$(date +%s)
+	the_time=$((the_end - the_begin))
+	echo "Durée du traitement: $the_time s."
 	
 fi
 
