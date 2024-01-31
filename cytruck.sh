@@ -108,37 +108,41 @@ fi
 #Tri -d1
 if [ $trid1 -eq 1 ]
 then	
-	the_begin=$(date +%s)
-	echo "begin"
 	check_temp_and_images 
+ 	echo "Début du traitement D1..."
+	the_begin=$(date +%s)
 	echo > tmp.txt | mv tmp.txt temp
 	# le if du awk ignore les doublons 
 	# sort pour le tri par ordre décroissant
 	tail -n $nbLines $data | awk -F';' '{
-    if (!driver_route[$1";"$6]++) {
-        nbRoutes[$6]++;
+    		if (!driver_route[$1";"$6]++) {
+       			nbRoutes[$6]++;
     	}
-	}END {
-    for (driver in nbRoutes) {
-        print driver ";" nbRoutes[driver];
-    	}	
+	} END {
+    		for (driver in nbRoutes) {
+        		print driver ";" nbRoutes[driver];
+    		}	
 	}' | sort -t';' -k2 -n -r | head -10 > temp/tmp.txt
-	#gnuplot -d1
-	gnuplot -persist -c "gnuplot/d1_gnuplot.gp"
-	convert 'tmpImg_d1.png' -rotate 90 'img_d1.png'
-	mv img_d1.png images
+ 
+ 	#Gnuplot -d1
+	gnuplot "gnuplot/d1_gnuplot.gp"
+	convert 'tmpImg_d1.png' -rotate 90 'Img_d1.png'
+	mv Img_d1.png images
 	mv tmpImg_d1.png temp 
 	
 	the_end=$(date +%s)
 	the_time=$((the_end - the_begin))
+ 	
+  	echo "L'image 'Img_d1.png' a été enregistré dans le dossier images."
 	echo "Durée du traitement: $the_time s."
 fi
 
 #Tri -d2
 if [ $trid2 -eq 1 ]
 then
-	the_begin=$(date +%s)
 	check_temp_and_images 
+	echo "Début du traitement D2..."
+	the_begin=$(date +%s)
 	echo > tmp.txt | mv tmp.txt temp
 	#awk: Somme des distance en fonction de chaque conducteur puis tri par ordre décroissant
 	tail -$nbLines $data| awk -F';' '{
@@ -148,79 +152,116 @@ then
 				print driver";"distance[driver]
 			}
 		}' | sort -t';' -k2 -n -r | head -10 > temp/tmp.txt 	
-	#gnuplot -d2
-	gnuplot -persist -c "gnuplot/d2_gnuplot.gp"
-	convert 'tmpImg_d2.png' -rotate 90 'img_d2.png'
-	mv img_d2.png images
+	
+ 	#Gnuplot -d2
+	gnuplot "gnuplot/d2_gnuplot.gp"
+	convert 'tmpImg_d2.png' -rotate 90 'Img_d2.png'
+	mv Img_d2.png images
 	mv tmpImg_d2.png temp 
 	
 	the_end=$(date +%s)
 	the_time=$((the_end - the_begin))
-	echo "Durée du traitement: $the_time s."
+	
+ 	echo "L'image 'Img_d2.png' a été enregistré dans le dossier images."
+ 	echo "Durée du traitement: $the_time s."
 fi
 
 #Tri -l
 if [ $triL -eq 1 ]
 then 
-	the_begin=$(date +%s)
 	check_temp_and_images 
+ 	echo "Début du traitement L..."
+	the_begin=$(date +%s)
 	echo > tmp.txt | mv tmp.txt temp
 	#awk: Somme des distance en fonction de chaque route puis tri par ordre décroissant 
 	tail -$nbLines $data | awk -F';' '{ 
 		distance[$1]=distance[$1]+$5;
 		} END { 
-		for ( routeId in distance ) {
-			print routeId";"distance[routeId]
+			for ( routeId in distance ) {
+				print routeId";"distance[routeId]
 		}
 	}' | sort -t';' -k2 -n -r | head -10 | sort -t';' -k1 -n -r > temp/tmp.txt  
-	#gnuplot -dl
-	gnuplot -persist -c "gnuplot/l_gnuplot.gp"
-	#----------------------------------
-	mv img_l.png images
+	
+ 	#Gnuplot -l
+	gnuplot "gnuplot/l_gnuplot.gp"
+	mv Img_l.png images
 	
 	the_end=$(date +%s)
 	the_time=$((the_end - the_begin))
+
+ 	echo "L'image 'Img_l.png' a été enregistré dans le dossier images."
 	echo "Durée du traitement: $the_time s."
 fi
 
 #Tri -t
 if [ $triT -eq 1 ]
 then
-	the_begin=$(date +%s)
 	check_temp_and_images
+ 	echo "Début du traitement T..."
+	the_begin=$(date +%s)
 	echo > tmp.txt | mv tmp.txt temp
 	#awk: Cree un fichier avec les villes, le nombre de traversé et de depart depuis $data
 	tail -$nbLines $data | awk -F';' '{
 			if(!seen[$1,$3]++) town_a[$3]++;
 			if(!seen[$1,$4]++) town_b[$4]++;
 			if($2==1 && !depart_seen[$1,$3]++) depart[$3]++;
-		}
-		END {
+		} END {
 			for(town in town_a)
 				print town ";" town_a[town]+town_b[town]";"depart[town]
-		}
-	' >> temp/tmp.txt
- 	#Compilation et execution du C
-  	(cd ./progc && make && ./C_sorting -t)
-	#Gnuplot
-	the_end=$(date +%s)
+	}' >> temp/tmp.txt
+ 	
+  	#Compilation et execution du C
+  	#(cd ./progc && make && ./C_sorting -t)
+	
+ 	#Gnuplot -t
+	#gnuplot "gnuplot/t_gnuplot.gp"
+ 	#mv Img_t images
+  
+  	the_end=$(date +%s)
 	the_time=$((the_end - the_begin))
-	echo "Durée du traitement: $the_time s."
+
+ 	#echo "L'image 'Img_t.png' a été enregistré dans le dossier images."
+ 	echo "Durée du traitement: $the_time s."
 	
 fi
 
 #Tri -s
 if [ $triS -eq 1 ]
 then
-	check_temp_and_images 
-	echo "tri -s"
+	check_temp_and_images
+   	echo "Début du traitement S..."
+	the_begin=$(date +%s)
+	echo > tmp.txt | mv tmp.txt temp
+	#awk: Cree un fichier avec les routes id, le min, le max et la moyenne depuis
+	tail -$nbLines $data | awk -F";" '{
+			if (min[$1] == "" || $5 < min[$1]) min[$1] = $5;
+			if (max[$1] == "" || $5 > max[$1]) max[$1] = $5;
+			sum[$1] += $5; count[$1]++ 
+		} 
+		END {
+			for (id in min)
+				print id";"min[id]";"max[id]";"sum[id]/count[id] 
+	}' >> temp/tmp.txt
+	grep "172705" temp/tmp.txt
+ 	
+  	#Compilation et execution du C
+  	#(cd ./progc && make && ./C_sorting -s)
 	
+ 	#Gnuplot -s
+ 	#gnuplot "gnuplot/s_gnuplot.gp
+	#mv Img_s images
+	
+ 	the_end=$(date +%s)
+	the_time=$((the_end - the_begin))
+ 	
+  	#echo "L'image 'Img_s.png' a été enregistré dans le dossier images."
+	echo "Durée du traitement: $the_time s."
 
 fi
 
 if [ "-f temp/*" ]
 then	
-	#echo "supprime les tmp"
+	echo "Suppression des fichiers tmp..."
 	rm -f temp/*
 fi
 echo "END"
