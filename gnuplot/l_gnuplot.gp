@@ -1,5 +1,5 @@
 set terminal png size 900,800
-set output 'img_l.png'
+set output 'Img_l.png'
 set style data histogram
 set style fill solid border -1
 set boxwidth 0.5
