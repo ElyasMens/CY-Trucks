@@ -1,7 +1,7 @@
 set terminal png size 800,900
 set output 'tmpImg_d2.png'
 set style data histogram
-set style fill solid  border -1
+set style fill solid border -1
 set boxwidth 0.5
 unset key
 set xlabel 'DRIVER NAMES' rotate by 180 offset 0,-9
