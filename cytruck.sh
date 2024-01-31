@@ -111,8 +111,7 @@ then
 	the_begin=$(date +%s)
 	echo "begin"
 	check_temp_and_images 
-	echo > tmp.txt
-	mv tmp.txt temp
+	echo > tmp.txt | mv tmp.txt temp
 	# le if du awk ignore les doublons 
 	# sort pour le tri par ordre décroissant
 	tail -n $nbLines $data | awk -F';' '{
@@ -190,21 +189,20 @@ then
 	the_begin=$(date +%s)
 	check_temp_and_images
 	echo > tmp.txt | mv tmp.txt temp
-	tail -$nbLines data.csv | awk -F';' '{ 
-	if($2==1){
-    	trajets[$3]++ 
-    	}
-	} END {
-    	print "Nombre de trajets passant en premier par la ville :"
-    	for (ville in trajets) {
-       	 print ville ";" trajets[ville]
-    	}
-	}' >> temp/tmp.txt 
-	grep "ANDILLY;417" temp/tmp.txt
-
-	#head -10 temp/tmp.txt
-	
-
+	#awk: Cree un fichier avec les villes, le nombre de traversé et de depart depuis $data
+	tail -$nbLines $data | awk -F';' '{
+			if(!seen[$1,$3]++) town_a[$3]++;
+			if(!seen[$1,$4]++) town_b[$4]++;
+			if($2==1 && !depart_seen[$1,$3]++) depart[$3]++;
+		}
+		END {
+			for(town in town_a)
+				print town ";" town_a[town]+town_b[town]";"depart[town]
+		}
+	' >> temp/tmp.txt
+ 	#Compilation et execution du C
+  	(cd ./progc && make && ./C_sorting -t)
+	#Gnuplot
 	the_end=$(date +%s)
 	the_time=$((the_end - the_begin))
 	echo "Durée du traitement: $the_time s."
