@@ -254,16 +254,19 @@ then
 	the_begin=$(date +%s)
 	echo > tmp.txt | mv tmp.txt temp
 	#awk: Cree un fichier avec les routes id, le min, le max et la moyenne depuis
-	tail -$nbLines $data | awk -F";" '{
+	#awk: Cree un fichier avec les routes id, le min, le max et la moyenne depuis
+	tail -$nbLines $data | LC_ALL=C awk -F";" '{
 			if (min[$1] == "" || $5 < min[$1]) min[$1] = $5;
 			if (max[$1] == "" || $5 > max[$1]) max[$1] = $5;
 			sum[$1] += $5; count[$1]++ 
 		} 
 		END {
 			for (id in min)
-				print id";"min[id]";"max[id]";"sum[id]/count[id] 
-	}' >> temp/tmp.txt
- 	
+					print id";"min[id]";"max[id]";"sum[id]/count[id] 
+		}
+	' > temp/tmp.txt
+ 	grep "172705" temp/tmp.txt
+	echo " "
   	#Compilation et execution du C
 	(cd ./progc && make > tmp_compile.txt 2>&1 && ./C_sorting -s >> tmp_compile.txt 2>&1)
 	if [ ! $? -eq 0 ]
