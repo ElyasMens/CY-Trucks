@@ -229,20 +229,19 @@ then
 		the_end=$(date +%s)
 		the_time=$((the_end - the_begin))
 		echo "Durée du traitement: $the_time s."
-    	exit 1
+    		exit 1
 	else
 		mv progc/tmp_compile.txt temp
 	fi
-	cat temp/finalT.txt
 	
  	#Gnuplot -t
-	#gnuplot "gnuplot/t_gnuplot.gp"
- 	#mv Img_t.png images
+	gnuplot "gnuplot/t_gnuplot.gp"
+ 	mv Img_t.png images
   
   	the_end=$(date +%s)
 	the_time=$((the_end - the_begin))
 
- 	#echo "L'image 'Img_t.png' a été enregistré dans le dossier images."
+ 	echo "L'image 'Img_t.png' a été enregistré dans le dossier images."
  	echo "Durée du traitement: $the_time s."
 	
 fi
@@ -275,7 +274,7 @@ then
 		the_end=$(date +%s)
 		the_time=$((the_end - the_begin))
 		echo "Durée du traitement: $the_time s."
- 		exit 1
+ 		exit 2
    	else
     	mv progc/tmp_compile.txt temp
 	fi
