@@ -1,13 +1,13 @@
 #!/bin/bash
 
-#Checks the program execution command
+#Verifie la commande d'execution
 if [ $# -lt 1 ] || [ $# -lt 2 ] 
 then
 	echo "Pour de l'aide faites la commande suivante: bash script [nom_fichier] -h"
 	exit 1	
 fi
 
-#check if the entry file exists 
+#Verifie si le fichier d'entree existe 
 if [ ! -f $1 ]
 then 
 	echo "le fichier n'existe pas"
@@ -15,13 +15,13 @@ then
 	exit 2
 fi
 
-#check if the dir demo exists
+#Verifie si le dossier demo existe 
 if [ ! -d demo ]
 then
 	mkdir demo
 fi
 
-#check if the dir data_dir exists
+#Verifie si le dossier data_dir existe 
 if [ ! -d data_dir ]
 then
 	mkdir data_dir
@@ -30,14 +30,14 @@ then
 	rm -f data_dir/*
 fi
 
-#check if the dir images is empty
+#cVerifie si le dossier images est vide deplace les fichiers dans demo sinon
 function check_images {
 if [ -f images/* ]
 then
 	mv images/* demo
 fi
 }
-#check if the dir images exists
+#Verifie si le dossier images existe 
 if [ ! -d images ]
 then
 	mkdir images
@@ -45,7 +45,17 @@ else
 	check_images
 fi
 
-#check if the dir temp exists 
+
+#Suppression des fichiers temp
+function remove_tmp {
+	if [ "-f temp/*" ]
+	then	
+		echo "Suppression des fichiers tmp..."
+		rm -f temp/*
+	fi
+}
+
+#Verifie si le dossier temp existe 
 function check_temp_and_images {
 	if [ ! -d temp ]
 	then
@@ -91,7 +101,6 @@ nbLines=`cat $data | wc -l`
 nbLines=$((nbLines -1)) 
 
 #-h: Afficher les commandes du programmes
-#prend tu temps sur le pc de l'ecole
 if [ $help -eq 1 ]
 then
 	echo "Pour executer le programme: bash script [nom_fichier] [option]"
@@ -100,8 +109,8 @@ then
 	echo "option -d1: 10 premiers conducteurs [disponible]"
 	echo "option -d2: 10 plus grandes distances [disponible]"
 	echo "option -l: 10 trajets les plus longs [disponible]"
-	echo "option -t: 10 villes les plus traversées [indisponible]"
-	echo "option -s: statistiques sur les étapes [indisponible]"
+	echo "option -t: 10 villes les plus traversées [disponible]"
+	echo "option -s: statistiques sur les étapes [disponible]"
 	
 fi
 
@@ -211,11 +220,24 @@ then
 	}' >> temp/tmp.txt
  	
   	#Compilation et execution du C
-  	#(cd ./progc && make && ./C_sorting -t)
+  	(cd ./progc && make > tmp_compile.txt 2>&1 && ./C_sorting -t >> tmp_compile.txt 2>&1)
+	if [ ! $? -eq 0 ]
+	then
+	    echo "Erreur de compilation / execution."
+		mv progc/tmp_compile.txt temp
+		remove_tmp
+		the_end=$(date +%s)
+		the_time=$((the_end - the_begin))
+		echo "Durée du traitement: $the_time s."
+    	exit 1
+	else
+		mv progc/tmp_compile.txt temp
+	fi
+	cat temp/finalT.txt
 	
  	#Gnuplot -t
 	#gnuplot "gnuplot/t_gnuplot.gp"
- 	#mv Img_t images
+ 	#mv Img_t.png images
   
   	the_end=$(date +%s)
 	the_time=$((the_end - the_begin))
@@ -242,14 +264,25 @@ then
 			for (id in min)
 				print id";"min[id]";"max[id]";"sum[id]/count[id] 
 	}' >> temp/tmp.txt
-	grep "172705" temp/tmp.txt
  	
   	#Compilation et execution du C
-  	#(cd ./progc && make && ./C_sorting -s)
-	
+	(cd ./progc && make > tmp_compile.txt 2>&1 && ./C_sorting -s >> tmp_compile.txt 2>&1)
+	if [ ! $? -eq 0 ]
+	then
+		echo "Erreur de compilation / execution."
+		mv progc/tmp_compile.txt temp
+		remove_tmp
+		the_end=$(date +%s)
+		the_time=$((the_end - the_begin))
+		echo "Durée du traitement: $the_time s."
+ 		exit 1
+   	else
+    	mv progc/tmp_compile.txt temp
+	fi
+ 	cat temp/finalS.txt
  	#Gnuplot -s
  	#gnuplot "gnuplot/s_gnuplot.gp
-	#mv Img_s images
+	#mv Img_s.png images
 	
  	the_end=$(date +%s)
 	the_time=$((the_end - the_begin))
@@ -259,10 +292,6 @@ then
 
 fi
 
-if [ "-f temp/*" ]
-then	
-	echo "Suppression des fichiers tmp..."
-	rm -f temp/*
-fi
+remove_tmp
 echo "END"
 
