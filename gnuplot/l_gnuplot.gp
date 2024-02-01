@@ -5,7 +5,7 @@ set style fill solid border -1
 set boxwidth 0.5
 set xlabel 'Route ID'
 set ylabel 'Distance (en km)'
-set title 'Treatment -L - Distance = f(Route)'
+set title 'Treatment L - Distance = f(Route)' font ",16"
 unset key
 set yrange [0:*]
 set datafile separator ';'
