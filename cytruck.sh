@@ -254,7 +254,6 @@ then
 	the_begin=$(date +%s)
 	echo > tmp.txt | mv tmp.txt temp
 	#awk: Cree un fichier avec les routes id, le min, le max et la moyenne depuis
-	#awk: Cree un fichier avec les routes id, le min, le max et la moyenne depuis
 	tail -$nbLines $data | LC_ALL=C awk -F";" '{
 			if (min[$1] == "" || $5 < min[$1]) min[$1] = $5;
 			if (max[$1] == "" || $5 > max[$1]) max[$1] = $5;
