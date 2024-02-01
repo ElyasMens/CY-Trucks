@@ -163,12 +163,12 @@ Avl *insertionAVL(Avl *a, Town *e, Dist *f, int *h, int o) {
         *h = 1;
         return creerAvl(e,f);
     } 
-    else if (o == 0 ? e->nbrT < a->element->nbrT : o == 1 ? strcmp(e->ville, a->element->ville) < 0 : f->max - f->min < a->elem->max - a->elem->min) {
+    else if (o == 0 ? e->nbrT < a->element->nbrT : o == 1 ? strcmp(e->ville, a->element->ville) > 0 : f->max - f->min < a->elem->max - a->elem->min) {
 
         a->fg = insertionAVL(a->fg, e, f,h, o);
         *h = -*h;
     } 
-    else if (o == 0 ? e->nbrT > a->element->nbrT : o == 1 ? strcmp(e->ville, a->element->ville) > 0 : f->max - f->min > a->elem->max - a->elem->min) {
+    else if (o == 0 ? e->nbrT > a->element->nbrT : o == 1 ? strcmp(e->ville, a->element->ville) < 0 : f->max - f->min > a->elem->max - a->elem->min) {
 
         a->fd = insertionAVL(a->fd, e,f, h, o);
     } 
@@ -351,6 +351,3 @@ void Tri_s() {
     free(allDist);
     free(a);
 }
-
-
-
