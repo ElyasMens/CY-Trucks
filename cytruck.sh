@@ -273,8 +273,6 @@ else
 						print id";"min[id]";"max[id]";"sum[id]/count[id] 
 			}
 		' > temp/tmp.txt
-		grep "172705" temp/tmp.txt
-		echo " "
 		#Compilation et execution du C
 		(cd ./progc && make > tmp_compile.txt 2>&1 && ./C_sorting -s >> tmp_compile.txt 2>&1)
 		if [ ! $? -eq 0 ]
@@ -289,15 +287,15 @@ else
 		else
 			mv progc/tmp_compile.txt temp
 		fi
-		cat temp/finalS.txt
+		echo "execution du gnu"
 		#Gnuplot -s
-		#gnuplot "gnuplot/s_gnuplot.gp
-		#mv Img_s.png images
+		gnuplot "gnuplot/s_gnuplot.gp"
+		mv Img_s.png images
 		
 		the_end=$(date +%s)
 		the_time=$((the_end - the_begin))
 		
-		#echo "L'image 'Img_s.png' a été enregistré dans le dossier images."
+		echo "L'image 'Img_s.png' a été enregistré dans le dossier images."
 		echo "Durée du traitement: $the_time s."
 	fi
 	remove_tmp
