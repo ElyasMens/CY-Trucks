@@ -2,6 +2,8 @@
 
 int main(int argc, char *argv[]){
     
+    printf("Execution du C...\n");
+    
     if(strcmp(argv[1], "-t") == 0){
 
         Tri_t();
