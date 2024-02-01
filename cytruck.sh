@@ -30,7 +30,7 @@ then
 	rm -f data_dir/*
 fi
 
-#cVerifie si le dossier images est vide deplace les fichiers dans demo sinon
+#Verifie si le dossier images est vide deplace les fichiers dans demo sinon
 function check_images {
 if [ -f images/* ]
 then
