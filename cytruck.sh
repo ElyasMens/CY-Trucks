@@ -25,11 +25,6 @@ fi
 if [ ! -d data_dir ]
 then
 	mkdir data_dir
-elif [ ! -f data_dir/$1 ]
-then
-	rm -f data_dir/*
-	echo "Copie du fichier dans le dossier data_dir en cours..."
-	cp $1 data_dir
 fi
 
 #Verifie si le dossier images est vide deplace les fichiers dans demo sinon
@@ -98,11 +93,6 @@ i=$((i+1));;
 esac
 done
 
-#Copie du fichier data dans le dossier data_dir 
-data="data_dir/$1"
-nbLines=`cat $data | wc -l`
-nbLines=$((nbLines -1)) 
-
 #-h: Afficher les commandes du programmes
 if [ $help -eq 1 ]
 then
@@ -125,7 +115,17 @@ else
 	fi
 
 	echo "Démarrage de l'éxécution..."
-
+	#Copie du fichier data dans le dossier data_dir 
+	if [ ! -f data_dir/$1 ]
+	then
+		rm -f data_dir/*
+		echo "Copie du fichier dans le dossier data_dir en cours..."
+		cp $1 data_dir
+	fi
+	data="data_dir/$1"
+	nbLines=`cat $data | wc -l`
+	nbLines=$((nbLines -1)) 
+	
 	#Tri -d1
 	if [ $trid1 -eq 1 ]
 	then	
