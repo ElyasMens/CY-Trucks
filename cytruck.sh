@@ -21,13 +21,15 @@ then
 	mkdir demo
 fi
 
-#Verifie si le dossier data_dir existe 
+#Verifie si le dossier data_dir existe et si le fichier de data s'y trouve
 if [ ! -d data_dir ]
 then
 	mkdir data_dir
-elif [ -f data_dir/* ]
+elif [ ! -f data_dir/$1 ]
 then
 	rm -f data_dir/*
+	echo "Copie du fichier dans le dossier data_dir en cours..."
+	cp $1 data_dir
 fi
 
 #Verifie si le dossier images est vide deplace les fichiers dans demo sinon
@@ -48,6 +50,7 @@ fi
 
 #Suppression des fichiers temp
 function remove_tmp {
+	echo "-----------------------------------"
 	if [ "-f temp/*" ]
 	then	
 		echo "Suppression des fichiers tmp..."
@@ -57,6 +60,7 @@ function remove_tmp {
 
 #Verifie si le dossier temp existe 
 function check_temp_and_images {
+	echo "-----------------------------------"
 	if [ ! -d temp ]
 	then
 		#echo "tmpdir created"
@@ -95,8 +99,7 @@ esac
 done
 
 #Copie du fichier data dans le dossier data_dir 
-cp $1 data_dir
-data="data_dir/$1" 
+data="data_dir/$1"
 nbLines=`cat $data | wc -l`
 nbLines=$((nbLines -1)) 
 
@@ -129,7 +132,8 @@ else
 		check_temp_and_images 
 		echo "Début du traitement D1..."
 		the_begin=$(date +%s)
-		echo > tmp.txt | mv tmp.txt temp
+		echo > tmp.txt 
+		mv tmp.txt temp
 		# le if du awk ignore les doublons 
 		# sort pour le tri par ordre décroissant
 		tail -n $nbLines $data | awk -F';' '{
@@ -141,7 +145,8 @@ else
 					print driver ";" nbRoutes[driver];
 				}	
 		}' | sort -t';' -k2 -n -r | head -10 > temp/tmp.txt
-	
+
+		echo "Execution du gnu..."
 		#Gnuplot -d1
 		gnuplot "gnuplot/d1_gnuplot.gp"
 		convert 'tmpImg_d1.png' -rotate 90 'Img_d1.png'
@@ -161,7 +166,8 @@ else
 		check_temp_and_images 
 		echo "Début du traitement D2..."
 		the_begin=$(date +%s)
-		echo > tmp.txt | mv tmp.txt temp
+		echo > tmp.txt 
+		mv tmp.txt temp
 		#awk: Somme des distance en fonction de chaque conducteur puis tri par ordre décroissant
 		tail -$nbLines $data| awk -F';' '{
 			distance[$6]=distance[$6]+$5;
@@ -171,6 +177,7 @@ else
 				}
 			}' | sort -t';' -k2 -n -r | head -10 > temp/tmp.txt 	
 		
+		echo "Execution du gnu..."
 		#Gnuplot -d2
 		gnuplot "gnuplot/d2_gnuplot.gp"
 		convert 'tmpImg_d2.png' -rotate 90 'Img_d2.png'
@@ -190,7 +197,8 @@ else
 		check_temp_and_images 
 		echo "Début du traitement L..."
 		the_begin=$(date +%s)
-		echo > tmp.txt | mv tmp.txt temp
+		echo > tmp.txt 
+		mv tmp.txt temp
 		#awk: Somme des distance en fonction de chaque route puis tri par ordre décroissant 
 		tail -$nbLines $data | awk -F';' '{ 
 			distance[$1]=distance[$1]+$5;
@@ -200,6 +208,7 @@ else
 			}
 		}' | sort -t';' -k2 -n -r | head -10 | sort -t';' -k1 -n -r > temp/tmp.txt  
 		
+		echo "Execution du gnu..."
 		#Gnuplot -l
 		gnuplot "gnuplot/l_gnuplot.gp"
 		mv Img_l.png images
@@ -217,7 +226,8 @@ else
 		check_temp_and_images
 		echo "Début du traitement T..."
 		the_begin=$(date +%s)
-		echo > tmp.txt | mv tmp.txt temp
+		echo > tmp.txt 
+		mv tmp.txt temp
 		#awk: Cree un fichier avec les villes, le nombre de traversé et de depart depuis $data
 		tail -$nbLines $data | LC_ALL=C awk -F';' '{
 				if(!seen[$1,$3]++) town_a[$3]++;
@@ -243,6 +253,7 @@ else
 			mv progc/tmp_compile.txt temp
 		fi
 		
+		echo "Execution du gnu..."
 		#Gnuplot -t
 		gnuplot "gnuplot/t_gnuplot.gp"
 		mv Img_t.png images
@@ -261,7 +272,8 @@ else
 		check_temp_and_images
 		echo "Début du traitement S..."
 		the_begin=$(date +%s)
-		echo > tmp.txt | mv tmp.txt temp
+		echo > tmp.txt 
+		mv tmp.txt temp
 		#awk: Cree un fichier avec les routes id, le min, le max et la moyenne depuis
 		tail -$nbLines $data | LC_ALL=C awk -F";" '{
 				if (min[$1] == "" || $5 < min[$1]) min[$1] = $5;
@@ -273,6 +285,7 @@ else
 						print id";"min[id]";"max[id]";"sum[id]/count[id] 
 			}
 		' > temp/tmp.txt
+
 		#Compilation et execution du C
 		(cd ./progc && make > tmp_compile.txt 2>&1 && ./C_sorting -s >> tmp_compile.txt 2>&1)
 		if [ ! $? -eq 0 ]
@@ -287,7 +300,7 @@ else
 		else
 			mv progc/tmp_compile.txt temp
 		fi
-		echo "execution du gnu"
+		echo "Execution du gnu..."
 		#Gnuplot -s
 		gnuplot "gnuplot/s_gnuplot.gp"
 		mv Img_s.png images
